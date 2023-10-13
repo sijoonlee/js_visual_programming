@@ -22,7 +22,7 @@ if (isProd) {
     await mainWindow.loadURL('app://./home')
   } else {
     const port = process.argv[2]
-    await mainWindow.loadURL(`http://localhost:${port}/clickablebox`)
+    await mainWindow.loadURL(`http://localhost:${port}/CurveTest`)
     mainWindow.webContents.openDevTools()
   }
 })()
