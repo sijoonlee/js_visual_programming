@@ -1,10 +1,12 @@
 import * as d3 from 'd3';
+import QuadraticCurve from './QuadraticCurve';
 
 
 class Rectangle {
     svg;
     rect;
     circleBottomRight;
+    circleAnchorRight;
 
     startX: number;
     startY: number;
@@ -12,13 +14,13 @@ class Rectangle {
     height: number;
 
     onDoubleClick: Function | undefined;
-    onChange: Function | undefined;
+    onMove: Function | undefined;
 
     isEditing: boolean;
 
     constructor(svg: d3.Selection<any, unknown, null, undefined>,
-        { startX, startY, width, height, onDoubleClick, onChange }
-        : { startX: number, startY: number, width: number, height: number, onDoubleClick?: Function, onChange?: Function }    
+        { startX, startY, width, height, onDoubleClick, onMove, onClickAnchor }
+        : { startX: number, startY: number, width: number, height: number, onDoubleClick?: Function, onMove?: Function }    
     ) {
         const instance = this;
         instance.svg = svg;
@@ -29,7 +31,7 @@ class Rectangle {
         instance.height = height;
         instance.isEditing = false;
         instance.onDoubleClick = onDoubleClick;
-        instance.onChange = onChange;
+        instance.onMove = onMove;
 
         instance.create()
     }
@@ -47,20 +49,48 @@ class Rectangle {
             .attr('stroke', 'red')
             .attr('stroke-width', 2)
             .call(d3.drag().on('drag', function (event) {
-                instance.startX += event.dx
-                instance.startY += event.dy
-                instance.rect.attr('x', instance.startX).attr('y', instance.startY)
+                const dx = event.dx
+                const dy = event.dy
 
-                if (instance.circleBottomRight) {
-                    instance.circleBottomRight.attr('cx', instance.startX + instance.width).attr('cy', instance.startY + instance.height);
-                }
-
-                instance.onChange?.(instance);
+                instance.moveByDifference(dx, dy);
+                instance.onMove?.(instance, dx, dy);
             }))
             .on('dblclick', function () {
                 instance.toggleEdit();
                 instance.onDoubleClick?.(instance);
             })
+
+        instance.circleAnchorRight = instance.svg
+            .append('circle')
+            .attr('cx', instance.startX + instance.width)
+            .attr('cy', instance.startY + instance.height / 2)
+            .attr('r', 5)
+            .attr('fill', 'green')
+            .on('click', function(event){
+                console.log('click', event)
+                const curve = new QuadraticCurve(instance.svg, {
+                    startX: instance.startX + instance.width,
+                    startY: instance.startY + instance.height / 2,
+                    controlX: instance.startX + instance.width + 10,
+                    controlY: instance.startY + instance.height,
+                    endX: instance.startX + instance.width + 20,
+                    endY: instance.startY + instance.height / 2,
+                    stroke: 'green'
+                })
+            })
+    }
+
+    moveByDifference(dx: number, dy: number) {
+        this.startX += dx
+        this.startY += dy
+        this.rect.attr('x', this.startX).attr('y', this.startY)
+
+        if (this.circleAnchorRight) {
+            this.circleAnchorRight.attr('cx', this.startX + this.width).attr('cy', this.startY + this.height/2);
+        }
+        if (this.circleBottomRight) {
+            this.circleBottomRight.attr('cx', this.startX + this.width).attr('cy', this.startY + this.height);
+        }
     }
 
     recreate(svg) {
@@ -91,10 +121,10 @@ class Rectangle {
                 let dx = event.dx;
                 let dy = event.dy;
 
-                if (dx < 0 && instance.width + dx <= 5) {
+                if (dx < 0 && instance.width + dx <= 10) {
                     dx = 0
                 }
-                if (dy < 0 && instance.height + dy <= 5) {
+                if (dy < 0 && instance.height + dy <= 10) {
                     dy = 0
                 }
 
@@ -107,7 +137,7 @@ class Rectangle {
                     .attr('width', instance.width)
                     .attr('height', instance.height)
 
-                instance.onChange?.(instance);
+                instance.onMove?.(instance);
             }));
     }
 

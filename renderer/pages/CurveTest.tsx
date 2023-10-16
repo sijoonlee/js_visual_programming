@@ -84,8 +84,6 @@ function CurveTest() {
             items.push(new item.type(layer, item.properties));
         }
         
-        svg.selectAll().data(data.map(item => item.order))
-
         setTimeout(() => {
             items[0].recreate(layers[1])
             items[1].recreate(layers[0])
