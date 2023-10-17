@@ -3,6 +3,8 @@ import QuadraticCurve from './QuadraticCurve';
 
 
 class Rectangle {
+    id;
+
     svg;
     rect;
     circleBottomRight;
@@ -15,14 +17,16 @@ class Rectangle {
 
     onDoubleClick: Function | undefined;
     onMove: Function | undefined;
+    onClickAnchor: Function | undefined;
 
     isEditing: boolean;
 
-    constructor(svg: d3.Selection<any, unknown, null, undefined>,
+    constructor(id: string, svg: d3.Selection<any, unknown, null, undefined>,
         { startX, startY, width, height, onDoubleClick, onMove, onClickAnchor }
-        : { startX: number, startY: number, width: number, height: number, onDoubleClick?: Function, onMove?: Function }    
+        : { startX: number, startY: number, width: number, height: number, onDoubleClick?: Function, onMove?: Function, onClickAnchor?: Function }    
     ) {
         const instance = this;
+        instance.id = id;
         instance.svg = svg;
         instance.startX = startX;
         instance.startY = startY;
@@ -32,6 +36,7 @@ class Rectangle {
         instance.isEditing = false;
         instance.onDoubleClick = onDoubleClick;
         instance.onMove = onMove;
+        instance.onClickAnchor = onClickAnchor;
 
         instance.create()
     }
@@ -77,6 +82,7 @@ class Rectangle {
                     endY: instance.startY + instance.height / 2,
                     stroke: 'green'
                 })
+                instance.onClickAnchor?.()
             })
     }
 
