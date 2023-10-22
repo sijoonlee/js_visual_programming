@@ -17,13 +17,17 @@ class Rectangle {
 
     onDoubleClick: Function | undefined;
     onMove: Function | undefined;
+
+    onAddAnchor: Function | undefined;
+    onRemoveAnchor: Function | undefined;
+    onDragAnchor: Function | undefined;
     onClickAnchor: Function | undefined;
 
     isEditing: boolean;
 
     constructor(id: string, svg: d3.Selection<any, unknown, null, undefined>,
-        { startX, startY, width, height, onDoubleClick, onMove, onClickAnchor }
-        : { startX: number, startY: number, width: number, height: number, onDoubleClick?: Function, onMove?: Function, onClickAnchor?: Function }    
+        { startX, startY, width, height, onDoubleClick, onMove, onAddAnchor, onRemoveAnchor, onClickAnchor, onDragAnchor }
+        : { startX: number, startY: number, width: number, height: number, onDoubleClick?: Function, onMove?: Function, onAddAnchor?: Function, onRemoveAnchor?: Function, onClickAnchor?: Function, onDragAnchor?: Function }    
     ) {
         const instance = this;
         instance.id = id;
@@ -36,6 +40,9 @@ class Rectangle {
         instance.isEditing = false;
         instance.onDoubleClick = onDoubleClick;
         instance.onMove = onMove;
+        instance.onAddAnchor = onAddAnchor;
+        instance.onRemoveAnchor = onRemoveAnchor;
+        instance.onDragAnchor = onDragAnchor;
         instance.onClickAnchor = onClickAnchor;
 
         instance.create()
@@ -80,9 +87,11 @@ class Rectangle {
                     controlY: instance.startY + instance.height,
                     endX: instance.startX + instance.width + 20,
                     endY: instance.startY + instance.height / 2,
-                    stroke: 'green'
+                    stroke: 'green',
+                    onDrag: instance.onDragAnchor
                 })
-                instance.onClickAnchor?.()
+                curve.toggleEdit();
+                instance.onAddAnchor?.(curve);
             })
     }
 

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import * as d3 from 'd3';
+import EventEmitter from 'events';
 import QuadraticCurve from '../d3Components/QuadraticCurve'
 import BezierCurve from '../d3Components/BezierCurve'
 import Rectangle from '../d3Components/Rectangle'
@@ -9,8 +10,13 @@ import Group from '../d3Components/Group'
 function CurveTest() {
     const svgRef = useRef(null);
 
+    
     useEffect(() => {
         console.log("render")
+        const aEventEmitter = new EventEmitter()
+        aEventEmitter.on('added', obj => { console.log('added', obj)})
+        const bEventEmitter = new EventEmitter()
+        bEventEmitter.on('moved', obj => {console.log('moved', obj)})
         const data = [
             {
                 id: uuidv4(),
@@ -19,7 +25,9 @@ function CurveTest() {
                     startX: 10,
                     startY: 10,
                     width: 50,
-                    height: 50
+                    height: 50,
+                    onAddAnchor: (curve) => { },
+                    onDragAnchor: (curve) => {}
                 }
             },
             {

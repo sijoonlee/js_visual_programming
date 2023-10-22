@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-
+import EventEmitter from 'events';
 
 class QuadraticCurve {
     svg;
@@ -19,11 +19,13 @@ class QuadraticCurve {
     isEditing: boolean;
     
     onDoubleClick: Function | undefined;
-    onChange: Function | undefined;
+    onDrag: Function | undefined;
+
+    eventEmitter = new EventEmitter();
 
     constructor(svg: d3.Selection<any, unknown, null, undefined>,
-        { startX, startY, controlX, controlY, endX, endY, stroke, onDoubleClick, onChange }
-        : { startX: number, startY: number, controlX: number, controlY: number, endX: number, endY: number, stroke: string, onDoubleClick?: Function, onChange?: Function }
+        { startX, startY, controlX, controlY, endX, endY, stroke, onDoubleClick, onDrag }
+        : { startX: number, startY: number, controlX: number, controlY: number, endX: number, endY: number, stroke: string, onDoubleClick?: Function, onDrag?: Function }
     ) {
         const instance = this;
         instance.svg = svg;
@@ -36,7 +38,7 @@ class QuadraticCurve {
         instance.stroke = stroke;
         instance.isEditing = false;
         instance.onDoubleClick = onDoubleClick;
-        instance.onChange = onChange;
+        instance.onDrag = onDrag;
 
         instance.create()
         
@@ -75,6 +77,11 @@ class QuadraticCurve {
                 updatedPath.moveTo(instance.startX, instance.startY);
                 updatedPath.quadraticCurveTo(instance.controlX, instance.controlY, instance.endX, instance.endY);
                 instance.line.attr('d', updatedPath.toString());
+
+                instance.onDrag?.(instance)
+
+                instance.eventEmitter.emit('moved', instance)
+                
             }))
             .on('dblclick', function () {
                 instance.toggleEdit();
@@ -125,7 +132,7 @@ class QuadraticCurve {
                 updatedPath.quadraticCurveTo(instance.controlX, instance.controlY, instance.endX, instance.endY);
                 instance.line.attr('d', updatedPath.toString());
 
-                instance.onChange?.()
+                instance.onDrag?.(instance)
             }));
     }
 
@@ -147,6 +154,8 @@ class QuadraticCurve {
                 updatedPath.moveTo(instance.startX, instance.startY);
                 updatedPath.quadraticCurveTo(instance.controlX, instance.controlY, instance.endX, instance.endY);
                 instance.line.attr('d', updatedPath.toString());
+
+                instance.onDrag?.(instance)
             }));
     }
 
@@ -167,6 +176,8 @@ class QuadraticCurve {
             updatedPath.moveTo(instance.startX, instance.startY);
             updatedPath.quadraticCurveTo(instance.controlX, instance.controlY, instance.endX, instance.endY);
             instance.line.attr('d', updatedPath.toString());
+
+            instance.onDrag?.(instance)
         }));
     }
 
